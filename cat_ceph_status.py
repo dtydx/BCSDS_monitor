@@ -89,11 +89,11 @@ def get_pg_status():
         hint_content='放置组PG存在故障'
         pg_status = "获取时间:{};\n内网地址:{};\n主机名称:{};\n详细信息:{};\n提示内容:{}.".format(
             alarm_sign.get_date_time, alarm_sign.inside_net, alarm_sign.host_name, run_events, hint_content)
+        email.txt_email('pg状态异常', pg_status)
         return pg_status
     else:
         pg_status = "获取时间:{};\n内网地址:{};\n主机名称:{};\n详细信息:{};\n提示内容:{}.".format(
             alarm_sign.get_date_time, alarm_sign.inside_net, alarm_sign.host_name, run_events,"None")
-        email.txt_email('pg状态异常', pg_status)
         return pg_status
 
 def dict_Avg( Dict ) :#去字典值的平均数
@@ -172,12 +172,12 @@ def get_ceph_disk_usage():
             hint_content += "磁盘{}使用率过高;\n".format(name)
     if hint_content != '':
         osd_usage = "获取时间:{};\n内网地址:{};\n主机名称:{};\n详细信息:\n{};提示内容:{}.".format(
-            alarm_sign.get_date_time, alarm_sign.inside_net, alarm_sign.host_name, run_events, 'None')
+            alarm_sign.get_date_time, alarm_sign.inside_net, alarm_sign.host_name, run_events, "None")
+        email.txt_email('存在磁盘使用率过高', osd_usage)
         return osd_usage
     else:
         osd_usage = "获取时间:{};\n内网地址:{};\n主机名称:{};\n详细信息:\n{};提示内容:{}.".format(
             alarm_sign.get_date_time, alarm_sign.inside_net, alarm_sign.host_name, run_events, hint_content)
-        email.txt_email('存在磁盘使用率过高', osd_usage)
         return osd_usage
 
 
