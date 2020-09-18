@@ -24,7 +24,7 @@ def thread2():
 
 def scheduler_jobs(spark):
     scheduler = BlockingScheduler()
-    scheduler.add_job(func=spark, trigger="interval", seconds=5)
+    scheduler.add_job(func=spark, trigger="interval", seconds=30)
     scheduler.start()
 
 if __name__ == '__main__':
