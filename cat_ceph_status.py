@@ -171,13 +171,65 @@ def get_ceph_disk_usage():
         if int(percent_used)>50:
             hint_content += "磁盘{}使用率过高;\n".format(name)
     if hint_content != '':
-        osd_usage = "获取时间:{};\n内网地址:{};\n主机名称:{};\n详细信息:\n{};提示内容:{}.".format(
-            alarm_sign.get_date_time, alarm_sign.inside_net, alarm_sign.host_name, run_events, "None")
+        osd_usage = "获取时间:{};\n内网地址:{};\n主机名称:{};\n详细信息:\n{}提示内容:{}.".format(
+            alarm_sign.get_date_time, alarm_sign.inside_net, alarm_sign.host_name, run_events,hint_content )
         email.txt_email('存在磁盘使用率过高', osd_usage)
         return osd_usage
     else:
-        osd_usage = "获取时间:{};\n内网地址:{};\n主机名称:{};\n详细信息:\n{};提示内容:{}.".format(
+        osd_usage = "获取时间:{};\n内网地址:{};\n主机名称:{};\n详细信息:\n{}提示内容:{}.".format(
+            alarm_sign.get_date_time, alarm_sign.inside_net, alarm_sign.host_name, run_events, "None")
+        return osd_usage
+
+def get_crond_status():
+    p1 = subprocess.Popen("ps aux|grep crond", shell=True, stdout=subprocess.PIPE)
+    crond = p1.stdout.readlines()
+    p2 = subprocess.Popen("ps aux|grep sdsom-rcm", shell=True, stdout=subprocess.PIPE)
+    sdsom_rcm = p2.stdout.readlines()
+    p3 = subprocess.Popen("ps aux|grep mysql", shell=True, stdout=subprocess.PIPE)
+    mysql = p3.stdout.readlines()
+    hint_content=''
+    if len(crond)>=2 and len(sdsom_rcm)>=2 and len(mysql)>=2:
+        run_events = "BC-SDS管理系统运行正常"
+        osd_usage = "获取时间:{};\n内网地址:{};\n主机名称:{};\n详细信息:{};\n提示内容:{}.".format(
+            alarm_sign.get_date_time, alarm_sign.inside_net, alarm_sign.host_name, run_events, "None")
+        return osd_usage
+    else:
+        run_events = "BC-SDS管理系统存在故障"
+        if len(crond)<2:
+            hint_content+='crond进程运行异常;'
+        elif len(sdsom_rcm)<2:
+            hint_content+='sdsom_rcm进程运行异常;'
+        elif len(mysql)<2:
+            hint_content += 'mysql进程运行异常;'
+        osd_usage = "获取时间:{};\n内网地址:{};\n主机名称:{};\n详细信息:{};\n提示内容:{}.".format(
+            alarm_sign.get_date_time, alarm_sign.inside_net, alarm_sign.host_name, run_events,hint_content)
+        email.txt_email('管理系统异常', osd_usage)
+        return osd_usage
+
+def get_pool_usage():
+    p = subprocess.Popen("/var/lib/ceph/bin/ceph osd pool stats -f json", shell=True, stdout=subprocess.PIPE)
+    j_data = json.loads(p.stdout.read())
+    run_events=""
+    hint_content=""
+    for data in j_data:
+        pool_name=data.get('pool_name')
+        state=data.get('status').get('state')
+        run_events += "资源池{}状态为{}".format(pool_name,state)
+        try:
+            client_io_rate=date.get('client_io_rate')
+            run_events += ",client_io为{}%;\n".format(client_io_rate)
+        except:
+            run_events += ";\n"
+        if state!=" health ":
+            hint_content+="资源池{}状态异常；\n".format(pool_name)
+    if hint_content != "":
+        osd_usage = "获取时间:{};\n内网地址:{};\n主机名称:{};\n详细信息:\n{}提示内容:{}.".format(
             alarm_sign.get_date_time, alarm_sign.inside_net, alarm_sign.host_name, run_events, hint_content)
+        email.txt_email('资源池异常', osd_usage)
+        return osd_usage
+    else:
+        osd_usage = "获取时间:{};\n内网地址:{};\n主机名称:{};\n详细信息:\n{}提示内容:{}.".format(
+            alarm_sign.get_date_time, alarm_sign.inside_net, alarm_sign.host_name, run_events, "None")
         return osd_usage
 
 

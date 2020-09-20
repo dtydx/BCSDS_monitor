@@ -9,7 +9,8 @@ class Multi_threading:
         self.job1=[cat_ceph_status.get_ceph_status,cat_ceph_status.get_osd_usage,cat_ceph_status.get_osd_status,
               cat_ceph_status.get_osd_latency,cat_ceph_status.get_pg_status,cat_ceph_status.get_mon_status,
               cat_ceph_status.get_ceph_disk_usage,cat_onenode.disk_send_mgs, cat_onenode.mem_send_mgs,
-              cat_onenode.load_send_mgs, cat_onenode.cpu_send_mgs]
+              cat_onenode.load_send_mgs, cat_onenode.cpu_send_mgs,cat_ceph_status.get_crond_status,
+                   cat_ceph_status.get_pool_usage]
 
     def thread1(self):
         for subjob in self.job1:
@@ -28,7 +29,7 @@ class Multi_threading:
 
     def scheduler_jobs(self,spark):
         scheduler = BlockingScheduler()
-        scheduler.add_job(func=spark, trigger="interval", seconds=30)
+        scheduler.add_job(func=spark, trigger="interval", seconds=5)
         scheduler.start()
 
 if __name__ == '__main__':
